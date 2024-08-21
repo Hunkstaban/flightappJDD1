@@ -28,9 +28,11 @@ public class FlightReader {
         try {
             List<DTOs.FlightDTO> flightList = flightReader.getFlightsFromFile("flights.json");
             List<DTOs.FlightInfo> flightInfoList = flightReader.getFlightInfoDetails(flightList);
-            flightInfoList.forEach(f->{
+            /*flightInfoList.forEach(f->{
                 System.out.println("\n"+f);
-            });
+            });*/
+
+            flightReader.avgAirlineFlightTime(flightInfoList);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -41,6 +43,37 @@ public class FlightReader {
 //        List<FlightDTO> flights = getObjectMapper().readValue(Paths.get(fileName).toFile(), List.class);
 //        return flights;
 //    }
+
+    public void avgAirlineFlightTime(List<DTOs.FlightInfo> flightInfoList) {
+        System.out.println("Average flight time per airline: \n");
+
+        List<DTOs.FlightInfo> filteredFlightInfoList = flightInfoList.stream()
+                .filter(flight -> flight.getAirline() != null)
+                .filter(flight -> !flight.getAirline().equals("empty"))
+                .toList();
+
+        filteredFlightInfoList.stream()
+                .map(flight -> {
+                    String airline = flight.getAirline();
+                    List<DTOs.FlightInfo> airlineFlights = filteredFlightInfoList.stream()
+                            .filter(flights -> flights.getAirline().equals(airline))
+                            .toList();
+                    long numberOfFlights = airlineFlights.stream().count();
+                    Duration duration = airlineFlights.stream()
+                            .map(flightDuration -> flightDuration.getDuration())
+                            .reduce((flightSum, flightTime) -> flightSum.plus(flightTime))
+                            .orElse(Duration.ZERO);
+                    double avgDuration = (double) duration.toHours() / numberOfFlights;
+
+                    String result = "Airline: " + airline +
+                            "\n - Number of flights flying with airline: " + numberOfFlights +
+                            "\n - Avg flight duration: " + String.format("%.2f", avgDuration) + " hours\n";
+
+                    return result;
+                })
+                .distinct().forEach(System.out::println);
+    }
+
 
 
     public List<DTOs.FlightInfo> getFlightInfoDetails(List<DTOs.FlightDTO> flightList) {
