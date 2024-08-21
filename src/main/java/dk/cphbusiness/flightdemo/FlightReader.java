@@ -28,10 +28,15 @@ public class FlightReader {
         try {
             List<DTOs.FlightDTO> flightList = flightReader.getFlightsFromFile("flights.json");
             List<DTOs.FlightInfo> flightInfoList = flightReader.getFlightInfoDetails(flightList);
+
+            System.out.println(flightReader.getAvgFlightTime());
+
             /*flightInfoList.forEach(f->{
                 System.out.println("\n"+f);
             });*/
+          
             flightReader.totalFlightTime(flightInfoList);
+          
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -85,5 +90,30 @@ public class FlightReader {
         return flightList;
     }
 
+
+    // avg. flight time for all flight combined
+
+    public Long getAvgFlightTime() throws IOException {
+
+        List<DTOs.FlightDTO> flightDTOList = getFlightsFromFile("flights.json");
+        List<DTOs.FlightInfo> flightInfoList = getFlightInfoDetails(flightDTOList);
+
+        Long avgFlightTime = flightInfoList.stream()
+                .map(flight -> flight.getDuration().getSeconds())
+                .reduce((durationNow, durationNext) -> durationNow + durationNext).get();
+
+
+
+//        //-------------------------- testing method to se if we get the first 10 flights and the seconds is right---------------------------------------------
+//        // step 1 = limit. Step 2 = vis kun duration og lav om til seconds. Step 3 = Manuelt efterregn.
+//        List<DTOs.FlightDTO> flightList2 = getFlightsFromFile("flights.json");
+//        List<DTOs.FlightInfo> flightInfoList2 = getFlightInfoDetails(flightList2);
+//
+//        long avgFlightTime = flightInfoList2.stream()
+//                .limit(10)
+//                .map(flight -> flight.getDuration().getSeconds())
+//                .reduce((sum1 , sum2) -> sum1 + sum2).get();
+        return avgFlightTime;
+    }
 
 }
