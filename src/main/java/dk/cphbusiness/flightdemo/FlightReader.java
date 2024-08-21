@@ -28,9 +28,10 @@ public class FlightReader {
         try {
             List<DTOs.FlightDTO> flightList = flightReader.getFlightsFromFile("flights.json");
             List<DTOs.FlightInfo> flightInfoList = flightReader.getFlightInfoDetails(flightList);
-            flightInfoList.forEach(f->{
+            /*flightInfoList.forEach(f->{
                 System.out.println("\n"+f);
-            });
+            });*/
+            flightReader.totalFlightTime(flightInfoList);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -41,6 +42,21 @@ public class FlightReader {
 //        List<FlightDTO> flights = getObjectMapper().readValue(Paths.get(fileName).toFile(), List.class);
 //        return flights;
 //    }
+
+    public void totalFlightTime(List<DTOs.FlightInfo> flightInfoList) {
+        Duration totalFlightTime = flightInfoList.stream()
+                .map(flight -> flight.getDuration())
+                .reduce((flightSum, flightTime) -> flightSum.plus(flightTime))
+                .orElse(Duration.ZERO);
+
+        System.out.println("Total flight time of all flights: \n" +
+                "In days: " + totalFlightTime.toDays() +
+                " days \nIn hours: " + totalFlightTime.toHours() +
+                " hours \nIn minutes: " + totalFlightTime.toMinutes() +
+                " minutes \nIn seconds: " + totalFlightTime.toSeconds() +
+                " seconds \nIn nanoseconds: " + totalFlightTime.toNanos() + " nanoseconds");
+
+    }
 
 
     public List<DTOs.FlightInfo> getFlightInfoDetails(List<DTOs.FlightDTO> flightList) {
